@@ -89,7 +89,7 @@ public:
 	/**
 	* @brief Get file path
 	*/
-	[[nodiscard]] inline const std::string& GetPath() const
+	[[nodiscard]] const std::string& GetPath() const
 	{
 		return m_path;
 	}
@@ -107,7 +107,7 @@ public:
 	/**
 	* @brief Get file extension (dot included)
 	*/
-	[[nodiscard]] inline const std::string& GetFileExtension() const
+	[[nodiscard]] const std::string& GetFileExtension() const
 	{
 		return m_pathExtention;
 	}

@@ -14,23 +14,6 @@
 #include <engine/debug/debug.h>
 #include <engine/debug/stack_debug_object.h>
 
-#if defined(__PSP__)
-#include <pspkernel.h>
-#endif
-
-/**
-* Vertex descriptor - 4 bytes
-* Sub mesh count - 4 bytes
-* ------ For one sub mesh
-* vertice_count - 4 bytes
-* index_count - 4 bytes
-* vertexMemSize - 4 bytes
-* indexMemSize - 4 bytes
-* vertice data - vertexMemSize bytes
-* indices data - indexMemSize bytes
-* ------
-*/
-
 bool AssimpMeshLoader::LoadMesh(MeshData& mesh, const LoadingOptions& options)
 {
 	STACK_DEBUG_OBJECT(STACK_HIGH_PRIORITY);
@@ -40,10 +23,7 @@ bool AssimpMeshLoader::LoadMesh(MeshData& mesh, const LoadingOptions& options)
 
 	const std::shared_ptr<File>& file = mesh.m_file;
 
-	bool opened = true;
-#if defined(EDITOR)
-	opened = file->Open(FileMode::ReadOnly);
-#endif
+	bool opened = file->Open(FileMode::ReadOnly);
 	if (opened)
 	{
 		size_t size = 0;

@@ -508,8 +508,8 @@ void FileExplorerMenu::Draw()
 				int currentCol = 0;
 				if (currentDir)
 				{
-					size_t folderCount = currentDir->subdirectories.size();
-					size_t fileCount = currentDir->files.size();
+					const size_t folderCount = currentDir->subdirectories.size();
+					const size_t fileCount = currentDir->files.size();
 					std::vector <std::shared_ptr<FileReference>> filesRefs = currentDir->files;
 
 					for (size_t i = 0; i < folderCount; i++)
