@@ -16,6 +16,7 @@
 
 bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr <FileReference>& ref, bool getOnMouseRelease)
 {
+	bool returnValue = false;
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
@@ -33,16 +34,17 @@ bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr <FileRefe
 				loadOptions.threaded = false;
 				file->LoadFileReference(loadOptions);
 				ref = file;
-				return true;
+				returnValue = true;
 			}
 		}
 		ImGui::EndDragDropTarget();
 	}
-	return false;
+	return returnValue;
 }
 
 bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr <ProjectDirectory>& ref, bool getOnMouseRelease)
 {
+	bool returnValue = false;
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
@@ -55,16 +57,17 @@ bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr <ProjectD
 			if (directory)
 			{
 				ref = directory;
-				return true;
+				returnValue = true;
 			}
 		}
 		ImGui::EndDragDropTarget();
 	}
-	return false;
+	return returnValue;
 }
 
 bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<Component>& ref, bool getOnMouseRelease)
 {
+	bool returnValue = false;
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
@@ -94,16 +97,17 @@ bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<Component
 		if (comp)
 		{
 			ref = comp->shared_from_this();
-			return true;
+			returnValue = true;
 		}
 
 		ImGui::EndDragDropTarget();
 	}
-	return false;
+	return returnValue;
 }
 
 bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<Collider>& ref, bool getOnMouseRelease)
 {
+	bool returnValue = false;
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
@@ -116,16 +120,17 @@ bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<Collider>
 			if (obj)
 			{
 				ref = std::dynamic_pointer_cast<Collider>(((Component*)obj)->shared_from_this());
-				return true;
+				returnValue = true;
 			}
 		}
 		ImGui::EndDragDropTarget();
 	}
-	return false;
+	return returnValue;
 }
 
 bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<GameObject>& ref, bool getOnMouseRelease)
 {
+	bool returnValue = false;
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
@@ -144,16 +149,17 @@ bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<GameObjec
 		if (gameObject)
 		{
 			ref = gameObject->shared_from_this();
-			return true;
+			returnValue = true;
 		}
 
 		ImGui::EndDragDropTarget();
 	}
-	return false;
+	return returnValue;
 }
 
 bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<Transform>& ref, bool getOnMouseRelease)
 {
+	bool returnValue = false;
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
@@ -172,12 +178,12 @@ bool EditorUI::DragDropTarget(const std::string& name, std::shared_ptr<Transform
 		if (trans)
 		{
 			ref = trans->shared_from_this();
-			return true;
+			returnValue = true;
 		}
 
 		ImGui::EndDragDropTarget();
 	}
-	return false;
+	return returnValue;
 }
 
 #endif // #if defined(EDITOR)
