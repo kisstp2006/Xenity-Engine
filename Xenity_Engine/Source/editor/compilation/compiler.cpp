@@ -46,7 +46,7 @@ Event<CompilerParams> Compiler::s_onCompilationStartedEvent;
 
 std::string Compiler::s_engineFolderLocation = "";
 std::string Compiler::s_engineProjectLocation = "";
-std::string  Compiler::s_compilerExecFileName = "";
+std::string Compiler::s_compilerExecFileName = "";
 
 CompilationMethod Compiler::s_compilationMethod = CompilationMethod::MSVC;
 bool Compiler::s_isCompilationCancelled = false;
@@ -166,6 +166,7 @@ CompileResult Compiler::Compile(CompilerParams params)
 
 	if (!cookResult)
 	{
+		OnCompileEnd(CompileResult::ERROR_COOK_FAILED, params);
 		return CompileResult::ERROR_COOK_FAILED;
 	}
 
@@ -186,7 +187,7 @@ CompileResult Compiler::Compile(CompilerParams params)
 		Debug::PrintError("[Compiler::Compile] No compile method for this platform!", true);
 		break;
 	}
-	FrameLimiter::SetIsEnabled(false);
+
 	// Send compile result
 	OnCompileEnd(result, params);
 	return result;
@@ -235,15 +236,16 @@ CompilerAvailability Compiler::CheckCompilerAvailability(const CompilerParams& p
 
 	int error = 0;
 
-	// Check if the compiler executable exists
-	if (!fs::exists(EngineSettings::values.compilerPath + s_compilerExecFileName))
-	{
-		error |= (int)CompilerAvailability::MISSING_COMPILER_SOFTWARE;
-	}
 
-	// Check if the engine compiled library exists
 	if (params.buildPlatform.platform == Platform::P_Windows)
 	{
+		// Check if the compiler executable exists
+		if (!fs::exists(EngineSettings::values.compilerPath + s_compilerExecFileName))
+		{
+			error |= (int)CompilerAvailability::MISSING_COMPILER_SOFTWARE;
+		}
+
+		// Check if the engine compiled library exists
 		if (params.buildType == BuildType::EditorHotReloading)
 		{
 			if (!fs::exists(s_engineFolderLocation + ENGINE_EDITOR_FOLDER + ".lib") ||
@@ -646,6 +648,8 @@ void Compiler::OnCompileEnd(CompileResult result, CompilerParams& params)
 	{
 		s_onCompilationEndedEvent.Trigger(params, result == CompileResult::SUCCESS);
 	}
+
+	FrameLimiter::SetIsEnabled(false);
 }
 
 std::string WindowsPathToWSL(const std::string& path)
