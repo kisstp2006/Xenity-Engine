@@ -40,6 +40,7 @@ public:
 	Color secondaryColor = Color::CreateFromRGBAFloat(0.22f, 0.48f, 0.796f, 1);
 	Color playTintColor = Color::CreateFromRGBAFloat(0.2f, 0.0f, 0.0f, 1);
 	bool isPlayTintAdditive = true;
+	bool isQwertyMode = true;
 };
 
 /**

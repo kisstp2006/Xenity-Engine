@@ -41,6 +41,7 @@ ReflectiveData EngineSettingsValues::GetReflectiveData()
 	Reflective::AddVariable(reflectedVariables, secondaryColor, "secondaryColor");
 	Reflective::AddVariable(reflectedVariables, playTintColor, "playTintColor");
 	Reflective::AddVariable(reflectedVariables, isPlayTintAdditive, "isPlayTintAdditive");
+	Reflective::AddVariable(reflectedVariables, isQwertyMode, "cameraQwertyMode");
 
 	return reflectedVariables;
 }

@@ -146,6 +146,12 @@ void EngineSettingsMenu::Draw()
 		if (valueChanged)
 			settingsChanged = true;
 
+		valueChanged = ImGui::Checkbox(EditorUI::GenerateItemId().c_str(), &EngineSettings::values.isQwertyMode);
+		ImGui::SameLine();
+		ImGui::TextWrapped("QWERTY camera mode");
+		if (valueChanged)
+			settingsChanged = true;
+
 		if (DrawCompilerOptions()) 
 		{
 			settingsChanged = true;

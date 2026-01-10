@@ -93,16 +93,20 @@ void SceneMenu::MoveCamera()
 
 		if (!InputSystem::GetKey(KeyCode::LEFT_CONTROL)) // Disable camera keyboard controls while making a shortcut
 		{
+			KeyCode forwardKey = EngineSettings::values.isQwertyMode ? KeyCode::W : KeyCode::Z;
+			KeyCode upKey = EngineSettings::values.isQwertyMode ? KeyCode::Q : KeyCode::A;
+			KeyCode leftKey = EngineSettings::values.isQwertyMode ? KeyCode::A : KeyCode::Q;
+
 			if (m_mode2D)
 				upDownRef = &upWorld;
-			if (InputSystem::GetKey(KeyCode::UP) || InputSystem::GetKey(KeyCode::Z))
+			if (InputSystem::GetKey(KeyCode::UP) || InputSystem::GetKey(forwardKey))
 				*upDownRef = -1 * Time::GetDeltaTime();
 			else if (InputSystem::GetKey(KeyCode::DOWN) || InputSystem::GetKey(KeyCode::S))
 				*upDownRef = 1 * Time::GetDeltaTime();
 
 			if (!m_mode2D)
 			{
-				if (InputSystem::GetKey(KeyCode::A))
+				if (InputSystem::GetKey(upKey))
 					upWorld = 1 * Time::GetDeltaTime();
 				else if (InputSystem::GetKey(KeyCode::E))
 					upWorld = -1 * Time::GetDeltaTime();
@@ -110,7 +114,7 @@ void SceneMenu::MoveCamera()
 
 			if (InputSystem::GetKey(KeyCode::RIGHT) || InputSystem::GetKey(KeyCode::D))
 				side = 1 * Time::GetDeltaTime();
-			else if (InputSystem::GetKey(KeyCode::LEFT) || InputSystem::GetKey(KeyCode::Q))
+			else if (InputSystem::GetKey(KeyCode::LEFT) || InputSystem::GetKey(leftKey))
 				side = -1 * Time::GetDeltaTime();
 		}
 
