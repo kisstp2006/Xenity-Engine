@@ -65,6 +65,7 @@ ReflectiveData RigidBody::GetReflectiveData()
 	AddVariable(reflectedVariables, m_bounce, "bounce");
 	AddVariable(reflectedVariables, m_mass, "mass");
 	AddVariable(reflectedVariables, m_friction, "friction");
+	AddVariable(reflectedVariables, m_disableSleep, "disableSleep");
 	AddVariable(reflectedVariables, lockedMovementAxis, "lockedMovementAxis");
 	AddVariable(reflectedVariables, lockedRotationAxis, "lockedRotationAxis");
 	return reflectedVariables;
@@ -81,6 +82,7 @@ void RigidBody::OnReflectionUpdated()
 	SetGravityMultiplier(m_gravityMultiplier);
 	SetFriction(m_friction);
 	UpdateLockedAxis();
+	SetIsSleepDisabled(m_disableSleep);
 }
 
 void RigidBody::SetVelocity(const Vector3& _velocity)
@@ -88,7 +90,7 @@ void RigidBody::SetVelocity(const Vector3& _velocity)
 	if (!m_bulletRigidbody)
 		return;
 
-	m_bulletRigidbody->activate();
+	Activate();
 	m_bulletRigidbody->setLinearVelocity(btVector3(_velocity.x, _velocity.y, _velocity.z));
 	m_velocity = _velocity;
 }
@@ -98,7 +100,7 @@ void RigidBody::ApplyTorque(const Vector3& torque)
 	if (!m_bulletRigidbody)
 		return;
 
-	m_bulletRigidbody->activate();
+	Activate();
 	m_bulletRigidbody->applyTorque(btVector3(torque.x, torque.y, torque.z));
 }
 
@@ -116,7 +118,7 @@ void RigidBody::AddAngularVelocity(const Vector3& velocity)
 	if (!m_bulletRigidbody)
 		return;
 
-	m_bulletRigidbody->activate();
+	Activate();
 	btVector3 angVel = m_bulletRigidbody->getAngularVelocity();
 	m_bulletRigidbody->setAngularVelocity(angVel + btVector3(velocity.x, velocity.y, velocity.z));
 }
@@ -126,7 +128,7 @@ void RigidBody::SetAngularVelocity(const Vector3& torque)
 	if (!m_bulletRigidbody)
 		return;
 
-	m_bulletRigidbody->activate();
+	Activate();
 	m_bulletRigidbody->setAngularVelocity(btVector3(torque.x, torque.y, torque.z));
 }
 
@@ -232,6 +234,22 @@ void RigidBody::SetLockedRotationAxis(LockedAxis axis)
 	UpdateLockedAxis();
 }
 
+void RigidBody::SetIsSleepDisabled(bool disableSleep)
+{
+	m_disableSleep = disableSleep;
+	if (m_bulletRigidbody)
+	{
+		if (m_disableSleep)
+		{
+			m_bulletRigidbody->setSleepingThresholds(0.0f, 0.0f);
+		}
+		else
+		{
+			m_bulletRigidbody->setSleepingThresholds(0.8f, 1.0f);
+		}
+	}
+}
+
 void RigidBody::RemoveReferences()
 {
 	PhysicsManager::RemoveRigidBody(this);
@@ -260,19 +278,20 @@ void RigidBody::UpdateRigidBodyMass()
 
 	btVector3 inertia(0, 0, 0);
 	m_bulletCompoundShape->calculateLocalInertia(m_mass, inertia);
-	if (m_isStatic) 
+	if (m_isStatic)
 	{
 		m_bulletRigidbody->setCollisionFlags(m_bulletRigidbody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 	}
-	else 
+	else
 	{
 		m_bulletRigidbody->setCollisionFlags(0);
 	}
+	//m_bulletRigidbody->setActivationState(DISABLE_DEACTIVATION);
 	m_bulletRigidbody->setMassProps(m_mass, inertia);
 
 	if (!m_isStatic)
 	{
-		m_bulletRigidbody->activate();
+		Activate();
 	}
 }
 
@@ -343,7 +362,7 @@ void RigidBody::UpdateLockedAxis()
 
 void RigidBody::OnEnabled()
 {
-	if(m_bulletRigidbody)
+	if (m_bulletRigidbody)
 	{
 		PhysicsManager::s_physDynamicsWorld->addRigidBody(m_bulletRigidbody);
 		PhysicsManager::s_physDynamicsWorld->addRigidBody(m_bulletTriggerRigidbody);
@@ -352,7 +371,7 @@ void RigidBody::OnEnabled()
 
 void RigidBody::OnDisabled()
 {
-	if(m_bulletRigidbody)
+	if (m_bulletRigidbody)
 	{
 		PhysicsManager::s_physDynamicsWorld->removeRigidBody(m_bulletRigidbody);
 		PhysicsManager::s_physDynamicsWorld->removeRigidBody(m_bulletTriggerRigidbody);
@@ -371,7 +390,7 @@ void RigidBody::OnTransformUpdated()
 
 	m_bulletTriggerRigidbody->setWorldTransform(m_bulletRigidbody->getWorldTransform());
 
-	m_bulletRigidbody->activate();
+	Activate();
 }
 
 void RigidBody::Tick()
@@ -380,7 +399,7 @@ void RigidBody::Tick()
 	{
 		m_disableEvent = true;
 		m_bulletTriggerRigidbody->setWorldTransform(m_bulletRigidbody->getWorldTransform());
-		
+
 		// Use the same matrix but with the x inverted
 		glm::mat4 mat;
 		m_bulletRigidbody->getCenterOfMassTransform().getOpenGLMatrix((float*)&mat);
@@ -443,8 +462,10 @@ void RigidBody::Awake()
 	m_bulletTriggerRigidbody->setCollisionShape(m_bulletTriggerCompoundShape);
 	m_bulletTriggerRigidbody->setCollisionFlags(m_bulletTriggerRigidbody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-	m_bulletRigidbody->activate();
+	Activate();
 	m_bulletTriggerRigidbody->activate();
+
+	SetIsSleepDisabled(m_disableSleep);
 
 	// Add an empty shape to enable gravity with an empty rigidbody
 	m_emptyShape = new btEmptyShape();
@@ -453,7 +474,7 @@ void RigidBody::Awake()
 	m_isTriggerEmpty = true;
 
 	const std::vector<std::shared_ptr<Collider>> col = GetGameObject()->GetComponents<Collider>();
-	for(const std::shared_ptr<Collider>& c : col)
+	for (const std::shared_ptr<Collider>& c : col)
 	{
 		c->SetRigidbody(std::dynamic_pointer_cast<RigidBody>(shared_from_this()));
 		c->CreateCollision(true);
@@ -514,7 +535,7 @@ void RigidBody::RemoveShape(btCollisionShape* shape)
 			m_bulletCompoundShape->addChildShape(offsetTransform, m_emptyShape);
 			m_isEmpty = false;
 		}
-		else 
+		else
 		{
 			m_isEmpty = true;
 		}
@@ -535,7 +556,7 @@ void RigidBody::RemoveTriggerShape(btCollisionShape* shape)
 		PhysicsManager::s_physDynamicsWorld->addRigidBody(m_bulletTriggerRigidbody);
 		m_isTriggerEmpty = false;
 	}
-	else 
+	else
 	{
 		m_isTriggerEmpty = true;
 	}

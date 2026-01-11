@@ -173,6 +173,19 @@ public:
 	*/
 	void SetLockedRotationAxis(LockedAxis axis);
 
+	/**
+	* @brief Check if sleep is disabled
+	*/
+	bool IsSleepDisabled() const
+	{
+		return m_disableSleep;
+	}
+
+	/**
+	* @brief Set if sleep is disabled (Can be useful for objects that froze after few seconds). Not recommended for performance reasons
+	*/
+	void SetIsSleepDisabled(bool disableSleep);
+
 protected:
 	void RemoveReferences()  override;
 	void Awake() override;
@@ -229,6 +242,7 @@ protected:
 	bool m_isTriggerEmpty = false;
 	bool m_generatesEvents = false;
 	bool m_disableEvent = false;
+	bool m_disableSleep = false;
 
 	/**
 	 * @brief [Internal]
