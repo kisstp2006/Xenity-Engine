@@ -62,15 +62,15 @@ void Time::Init()
 
 void Time::Reset()
 {
-#if defined(_WIN32) || defined(_WIN64) || defined(__LINUX__)
-	start_point = std::chrono::high_resolution_clock::now();
-	end_point = start_point;
-#elif defined(__PSP__)
+#if defined(__PSP__)
 	sceRtcGetCurrentTick(&currentTick);
 	lastTick = currentTick;
 #elif defined(__vita__)
 	sceRtcGetCurrentTick(&currentTick);
 	lastTick = currentTick;
+#else
+	start_point = std::chrono::high_resolution_clock::now();
+	end_point = start_point;
 #endif
 	s_time = 0;
 	s_unscaledTime = 0;
