@@ -3,7 +3,7 @@
 To be able to code and compile your game on Windows and to play in the editor,
 
 You have to: 
-- Install [Visual Studio 2022](https://visualstudio.microsoft.com/),
+- Install [Visual Studio 2022 or 2026](https://visualstudio.microsoft.com/),
 - Install [Visual Studio Code](https://code.visualstudio.com/),
 - Set `Compiler path` in the `Engine Settings` menu (`Window -> Engine Settings`) if your Visual Studio installation/version is different.<br>
 

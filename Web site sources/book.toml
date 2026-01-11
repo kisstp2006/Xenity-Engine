@@ -9,6 +9,3 @@ enable = true
 
 [output.html]
 additional-css = ["custom.css"]
-
-# https://github.com/lambdalisue/rs-mdbook-alerts
-[preprocessor.alerts]

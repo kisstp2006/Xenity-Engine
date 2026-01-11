@@ -231,3 +231,20 @@ Parameters:
 ```cpp
 void SetLockedMovementAxis(LockedAxis axis)
 ```
+
+---
+### IsSleepDisabled
+Check if sleep is disabled.
+```cpp
+bool IsSleepDisabled() const
+```
+
+---
+### SetIsSleepDisabled
+Set if sleep is disabled. (Can be useful for objects that froze after few seconds). Not recommended for performance reasons.
+
+Parameters:
+- `disableSleep`: True to disable sleep optimization
+```cpp
+void SetIsSleepDisabled(bool disableSleep)
+```
