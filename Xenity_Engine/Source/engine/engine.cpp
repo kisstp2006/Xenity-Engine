@@ -405,76 +405,73 @@ void Engine::Loop()
 			}
 #endif
 
-			// Skip some frames to stabilize delta time
-			if (frameToSkip == 0)
+			if (ProjectManager::GetProjectState() == ProjectState::Loaded)
 			{
-				if (ProjectManager::GetProjectState() == ProjectState::Loaded)
+				AssetManager::RemoveUnusedFiles();
+				// Skip some frames to stabilize delta time
+				if (GameplayManager::GetGameState() == GameState::Playing && frameToSkip == 0)
 				{
-					AssetManager::RemoveUnusedFiles();
-					if (GameplayManager::GetGameState() == GameState::Playing)
-					{
-						PhysicsManager::Update();
-					}
+					PhysicsManager::Update();
+				}
 
-					// Update all components
+				// Update all components
 #if defined(EDITOR)
 					// Catch game's code error to prevent the editor to crash
-					const bool tryResult = CrashHandler::CallInTry(GameplayManager::UpdateComponents);
-					if (tryResult)
-					{
-						std::string lastComponentMessage = "Error in game's code! Stopping the game...\n";
-						const std::shared_ptr<Component> lastComponent = GameplayManager::GetLastUpdatedComponent().lock();
-						if (lastComponent)
-						{
-							lastComponentMessage += "Component name: " + lastComponent->GetComponentName();
-							if (lastComponent->GetGameObjectRaw())
-							{
-								lastComponentMessage += "\nThis component was on the gameobject: " + lastComponent->GetGameObjectRaw()->GetName();
-							}
-						}
-						Debug::PrintError(lastComponentMessage);
-
-						GameplayManager::SetGameState(GameState::Stopped, true);
-					}
-#else
-					GameplayManager::UpdateComponents();
-#endif
-
-					// Remove all destroyed gameobjects and components
-					GameplayManager::RemoveDestroyedGameObjects();
-					GameplayManager::RemoveDestroyedComponents();
-
-					s_canUpdateAudio = true;
-
-					// Draw
-					Graphics::Draw();
-
-					if (!Screen::nextScreenshotFileName.empty())
-					{
-						Screen::MakeScreenshotInternal(Screen::nextScreenshotFileName);
-					}
-
-					/*if (InputSystem::GetKey(KeyCode::LTRIGGER1) && InputSystem::GetKeyDown(KeyCode::RTRIGGER1))
-					{
-						Screen::MakeScreenshot("screenshot");
-					}*/
-				}
-				else
+				const bool tryResult = CrashHandler::CallInTry(GameplayManager::UpdateComponents);
+				if (tryResult)
 				{
-#if defined(EDITOR)
-					glBindFramebuffer(GL_FRAMEBUFFER, 0);
-					s_renderer->Clear(ClearMode::Color_Depth);
-
-					// Limit frame rate to reduce CPU and GPU usage in the editor start page
-					if (Time::GetUnscaledDeltaTime() < 1 / 60.0f)
+					std::string lastComponentMessage = "Error in game's code! Stopping the game...\n";
+					const std::shared_ptr<Component> lastComponent = GameplayManager::GetLastUpdatedComponent().lock();
+					if (lastComponent)
 					{
-						SDL_Delay(static_cast<uint32_t>((1 / 60.0f - Time::GetUnscaledDeltaTime()) * 1000));
+						lastComponentMessage += "Component name: " + lastComponent->GetComponentName();
+						if (lastComponent->GetGameObjectRaw())
+						{
+							lastComponentMessage += "\nThis component was on the gameobject: " + lastComponent->GetGameObjectRaw()->GetName();
+						}
 					}
-#endif
+					Debug::PrintError(lastComponentMessage);
+
+					GameplayManager::SetGameState(GameState::Stopped, true);
 				}
+#else
+				GameplayManager::UpdateComponents();
+#endif
+
+				// Remove all destroyed gameobjects and components
+				GameplayManager::RemoveDestroyedGameObjects();
+				GameplayManager::RemoveDestroyedComponents();
+
+				s_canUpdateAudio = true;
+
+				// Draw
+				Graphics::Draw();
+
+				if (!Screen::nextScreenshotFileName.empty())
+				{
+					Screen::MakeScreenshotInternal(Screen::nextScreenshotFileName);
+				}
+
+				/*if (InputSystem::GetKey(KeyCode::LTRIGGER1) && InputSystem::GetKeyDown(KeyCode::RTRIGGER1))
+				{
+					Screen::MakeScreenshot("screenshot");
+				}*/
+			}
+			else
+			{
+#if defined(EDITOR)
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				s_renderer->Clear(ClearMode::Color_Depth);
+
+				// Limit frame rate to reduce CPU and GPU usage in the editor start page
+				if (Time::GetUnscaledDeltaTime() < 1 / 60.0f)
+				{
+					SDL_Delay(static_cast<uint32_t>((1 / 60.0f - Time::GetUnscaledDeltaTime()) * 1000));
+				}
+#endif
 			}
 
-			if (SceneManager::s_nextSceneToLoad != nullptr) 
+			if (SceneManager::s_nextSceneToLoad != nullptr)
 			{
 				SceneManager::LoadSceneInternal(SceneManager::s_nextSceneToLoad, SceneManager::DialogMode::NoDialog);
 				frameToSkip = 4;
