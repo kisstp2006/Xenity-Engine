@@ -22,7 +22,7 @@ void AboutMenu::Draw()
 	{
 		OnStartDrawing();
 
-		ImGui::Text("Version: 0.1");
+		ImGui::Text("Version: %s", ENGINE_VERSION);
 		ImGui::Text("Made by Fewnity with love <3");
 
 		if(ImGui::Button("Credits"))
