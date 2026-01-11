@@ -50,6 +50,7 @@ public:
 
 	bool m_loop = true;
 	bool m_isPlaying = false;
+	bool m_needRemove = false;
 };
 
 class Channel

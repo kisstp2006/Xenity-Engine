@@ -339,19 +339,30 @@ int fillAudioBufferThread()
 		if (!Engine::IsRunning(false))
 		{
 		#if defined(__PS3__)
-			return;
+			break;
 		#else
 			return 0;	
 		#endif
 		}
 
 		AudioManager::s_myMutex->Lock();
-		const size_t playedSoundsCount = AudioManager::s_channel->m_playedSoundsCount;
+		size_t playedSoundsCount = AudioManager::s_channel->m_playedSoundsCount;
 
 		// Fill each stream buffers
 		for (size_t soundIndex = 0; soundIndex < playedSoundsCount; soundIndex++)
 		{
-			auto& sound = AudioManager::s_channel->m_playedSounds[soundIndex];
+			PlayedSound* sound = AudioManager::s_channel->m_playedSounds[soundIndex];
+
+			if (sound->m_needRemove)
+			{
+				// Remove played sound
+				AudioManager::s_channel->m_playedSounds.erase(AudioManager::s_channel->m_playedSounds.begin() + soundIndex);
+				AudioManager::s_channel->m_playedSoundsCount--;
+				delete sound;
+				soundIndex--;
+				playedSoundsCount--;
+				continue;
+			}
 
 			const std::unique_ptr<AudioClipStream>& stream = sound->m_audioClipStream;
 
@@ -391,7 +402,7 @@ int fillAudioBufferThread()
 			const size_t count = AudioManager::s_channel->m_playedSoundsCount;
 			for (size_t i = 0; i < count; i++)
 			{
-				const auto& playedSound = AudioManager::s_channel->m_playedSounds[i];
+				PlayedSound* playedSound = AudioManager::s_channel->m_playedSounds[i];
 				const std::shared_ptr<AudioSource> audioSource = playedSound->m_audioSource.lock();
 				if (audioSource) 
 				{
@@ -700,9 +711,8 @@ void AudioManager::StopAudioSource(const std::shared_ptr<AudioSource>& audioSour
 
 	if (found)
 	{
-		delete s_channel->m_playedSounds[audioSourceIndex];
-		s_channel->m_playedSounds.erase(s_channel->m_playedSounds.begin() + audioSourceIndex);
-		s_channel->m_playedSoundsCount--;
+		PlayedSound* playedSound = s_channel->m_playedSounds[audioSourceIndex];
+		playedSound->m_needRemove = true;
 	}
 
 	AudioManager::s_myMutex->Unlock();
@@ -737,9 +747,8 @@ void AudioManager::RemoveAudioSource(AudioSource* audioSource)
 
 	if (found)
 	{
-		delete s_channel->m_playedSounds[audioSourceIndex];
-		s_channel->m_playedSounds.erase(s_channel->m_playedSounds.begin() + audioSourceIndex);
-		s_channel->m_playedSoundsCount--;
+		PlayedSound* playedSound = s_channel->m_playedSounds[audioSourceIndex];
+		playedSound->m_needRemove = true;
 	}
 
 	AudioManager::s_myMutex->Unlock();
